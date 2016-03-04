@@ -194,6 +194,15 @@
         primary key (id)
     ) ENGINE=InnoDB;
 
+    create table data_group_permission (
+        id bigint not null auto_increment,
+        name varchar(255) not null,
+        readable bit not null,
+        permission_id bigint not null,
+        primary key (id),
+        unique (permission_id, name)
+    ) ENGINE=InnoDB;
+
     create table data_migration (
         id bigint not null auto_increment,
         data__id bigint not null,
@@ -246,6 +255,12 @@
         index_key bigint,
         relative_path varchar(255),
         partition_index__id bigint not null,
+        primary key (id)
+    ) ENGINE=InnoDB;
+
+    create table data_permission (
+        id bigint not null auto_increment,
+        permission_for_others bit not null,
         primary key (id)
     ) ENGINE=InnoDB;
 
@@ -666,7 +681,6 @@
     create table system_job_configuration (
         data_generator bit not null,
         id bigint not null,
-        full_data_permission_fk bigint not null,
         primary key (id)
     ) ENGINE=InnoDB;
 
@@ -730,7 +744,7 @@
         notification_addresses varchar(255),
         notification_success_addresses varchar(255),
         id bigint not null,
-        full_data_permission_fk bigint not null,
+        data_permission_fk bigint not null,
         workbook_view_fk bigint not null,
         primary key (id)
     ) ENGINE=InnoDB;
@@ -903,6 +917,12 @@
         add constraint FKCAAB474FF207CAD2 
         foreign key (id) 
         references data_sink_configuration (id);
+
+    alter table data_group_permission 
+        add index FK81C4EB8494A6BC9 (permission_id), 
+        add constraint FK81C4EB8494A6BC9 
+        foreign key (permission_id) 
+        references data_permission (id);
 
     alter table data_migration 
         add index FKF5E61179677F7CB3 (migration_job__id), 
@@ -1240,12 +1260,6 @@
         foreign key (id) 
         references dap_job_configuration (id);
 
-    alter table system_job_configuration 
-        add index FK2F23E1E43A5B7ADC (full_data_permission_fk), 
-        add constraint FK2F23E1E43A5B7ADC 
-        foreign key (full_data_permission_fk) 
-        references permission (id);
-
     alter table system_job_data 
         add index FK27599EFC3AE468A7 (id), 
         add constraint FK27599EFC3AE468A7 
@@ -1283,10 +1297,10 @@
         references workbook_viewstate (id);
 
     alter table workbook_configuration 
-        add index FKF5BA3AF13A5B7ADC (full_data_permission_fk), 
-        add constraint FKF5BA3AF13A5B7ADC 
-        foreign key (full_data_permission_fk) 
-        references permission (id);
+        add index FKF5BA3AF1762D7B9E (data_permission_fk), 
+        add constraint FKF5BA3AF1762D7B9E 
+        foreign key (data_permission_fk) 
+        references data_permission (id);
 
     alter table workbook_data 
         add index FK1621734F3AE468A7 (id), 
